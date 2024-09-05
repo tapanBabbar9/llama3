@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Query
 from fastapi.responses import JSONResponse, FileResponse
+from datetime import timedelta
 import os
 import xml.etree.ElementTree as ET
 
@@ -23,7 +24,6 @@ books = [
     {"title": "Gaucho", "author": "Jorge Luis Borges"},
     {"title": "TO PERM OR NOT TO PERM", "author": "William Shakespeare (as Hamlet)"},
     {"title": "VALLEY OF THE DOLLS", "author": "Jacqueline Susann"},
-    {"title": "Mushrooms", "author": "Lewis Carroll"},
     {"title": "9 1/2 Weeks", "author": "Judith Viola"},
     {"title": "Willy Wonka", "author": "Roald Dahl"},
     {"title": "The Way We Were", "author": "Arthur Laurents"},
@@ -51,7 +51,23 @@ books = [
     {"title": "Barron's", "author": "Walter Burley Griffin"},
 ]
 
-
+def convert_timestamp(timestamp):
+    # Remove the trailing 't' and convert to an integer
+    milliseconds = int(timestamp[:-1])
+    
+    # Convert milliseconds to seconds
+    seconds = milliseconds / 1000
+    
+    # Convert seconds to a timedelta object
+    time_delta = timedelta(seconds=seconds)
+    
+    # Extract hours and minutes from the timedelta object
+    total_seconds = int(time_delta.total_seconds())
+    hours, remainder = divmod(total_seconds, 3600)
+    minutes, _ = divmod(remainder, 60)
+    
+    # Format as hh:mm
+    return f"{int(hours):02}:{int(minutes):02}"
 
 @app.get("/books")
 def get_books():
@@ -75,16 +91,26 @@ def search_books_in_xml(query: str):
             print(f"Searching in {file_name}")
             print(root)
             # Search for the query in the text content of each <p> tag
-            for elem in root.findall(".//ttml:p", namespaces):
+            dialogue = root.findall(".//ttml:p", namespaces)
+            for idx, elem in  enumerate(dialogue):
                 text = elem.text
                 if text is not None and query.lower() in text.lower():
                     # Extract the necessary attributes
                     begin = elem.get('begin')
+                    # Initialize the result dictionary
                     result = {
                         'file': file_name,
-                        'begin': begin,
-                        'text': text
+                        'begin': convert_timestamp(begin),
+                        'text': dialogue[idx].text if dialogue[idx].text is not None else ''
                     }
+
+                    # Check if there is a previous dialogue element and .text exists
+                    if idx > 0 and dialogue[idx - 1].text is not None:
+                        result['text'] = dialogue[idx - 1].text + " " + result['text']
+
+                    # Check if there is a next dialogue element and .text exists
+                    if idx < len(dialogue) - 1 and dialogue[idx + 1].text is not None:
+                        result['text'] += " " + dialogue[idx + 1].text
                     results.append(result)
     
     return results

@@ -4,7 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book Search</title>
+    <title>Book Mentions in Gilmore Girls</title>
+    <meta name="description" content="So, how are you liking Moby Dick? - Oh, it's really good.">
+    <meta property="og:title" content="Book Mentions in Gilmore Girls" />
+    <meta property="og:description" content="So, how are you liking Moby Dick? - Oh, it's really good." />
+    <meta property="og:image"
+        content="rory.jpg" />
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -77,10 +82,11 @@
 </head>
 
 <body>
-    <h1>Search Book Mentions in XML Files</h1>
+    <h1>Search Book Mentions in Gilmore Girls (S1)</h1>
+    <p style="text-align: center;">Created using Llama 3 LLM</p>
     <div class="search-container">
-        <input type="text" id="bookSearch" placeholder="Type to search..." oninput="filterBooks()" />
         <ul id="bookList"></ul>
+        <p>click on the book to view dialogues</p>
     </div>
     <div class="results-container" id="results"></div>
 
@@ -100,7 +106,19 @@
             bookList.innerHTML = '';
             books.forEach(book => {
                 const li = document.createElement('li');
-                li.textContent = book.title;
+
+                // Create a span for the book title and make it bold
+                const titleSpan = document.createElement('span');
+                titleSpan.innerHTML = `<strong>${book.title}</strong>`;
+
+                // Create a span for the author
+                const authorSpan = document.createElement('span');
+                authorSpan.textContent = ` by ${book.author}`;
+
+                // Append both spans to the list item
+                li.appendChild(titleSpan);
+                li.appendChild(authorSpan);
+
                 li.onclick = () => searchBookMentions(book.title);
                 bookList.appendChild(li);
             });
@@ -141,9 +159,13 @@
             results.forEach(result => {
                 const div = document.createElement('div');
                 div.className = 'result';
-                div.innerHTML = `<p><strong>File Name:</strong> ${result.file}</p>
-                        <p><strong>Begin:</strong> ${result.begin}</p>
-                        <p><strong>Text:</strong> ${result.text}</p>`;
+                const episodeNumberMatch = result.file.match(/ep-(\d+)\.xml/);
+                const episodeNumber = episodeNumberMatch ? episodeNumberMatch[1] : 'Unknown';
+
+                // Format the episode number
+                const episodeName = `Episode ${episodeNumber}`;
+                div.innerHTML = `<p><strong>${episodeName}</strong></p>
+                        <p><strong>Dialogue: </strong>"${result.text}"</p>`;
                 resultsContainer.appendChild(div);
             });
         }
