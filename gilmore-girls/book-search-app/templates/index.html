@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Search</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .search-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .search-container input {
+            padding: 10px;
+            font-size: 16px;
+            width: 300px;
+            margin-bottom: 10px;
+        }
+
+        #bookList {
+            list-style-type: none;
+            padding: 0;
+            max-height: 150px;
+            overflow-y: auto;
+            width: 300px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        #bookList li {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        #bookList li:hover {
+            background-color: #f0f0f0;
+        }
+
+        .results-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .result {
+            background-color: #fff;
+            padding: 10px;
+            border: 1px solid #ddd;
+            width: 100%;
+            max-width: 600px;
+            margin: 10px 0;
+            border-radius: 4px;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .result p {
+            margin: 0;
+            padding: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Search Book Mentions in XML Files</h1>
+    <div class="search-container">
+        <input type="text" id="bookSearch" placeholder="Type to search..." oninput="filterBooks()" />
+        <ul id="bookList"></ul>
+    </div>
+    <div class="results-container" id="results"></div>
+
+    <script>
+        let books = [];
+
+        // Fetch books from the FastAPI backend
+        fetch("http://127.0.0.1:8000/books")
+            .then(response => response.json())
+            .then(data => {
+                books = data.books;
+                renderBooks(books);
+            });
+
+        function renderBooks(books) {
+            const bookList = document.getElementById('bookList');
+            bookList.innerHTML = '';
+            books.forEach(book => {
+                const li = document.createElement('li');
+                li.textContent = book.title;
+                li.onclick = () => searchBookMentions(book.title);
+                bookList.appendChild(li);
+            });
+        }
+
+        function filterBooks() {
+            const query = document.getElementById('bookSearch').value.toLowerCase();
+            const filteredBooks = books.filter(book => book.toLowerCase().includes(query));
+            renderBooks(filteredBooks);
+        }
+
+        function searchBookMentions(book) {
+            // Fetch search results for the selected book
+            fetch(`http://127.0.0.1:8000/search?query=${encodeURIComponent(book)}`)
+                .then(response => {
+                    // Check if response is OK
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('API Response:', data);
+                    if (Array.isArray(data) && data.length > 0) {
+                        displayResults(data);
+                    } else {
+                        displayResults([{ file: 'No results', begin: '', text: 'No results found' }]);
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                });
+        }
+
+        function displayResults(results) {
+            const resultsContainer = document.getElementById('results');
+            resultsContainer.innerHTML = '';
+            results.forEach(result => {
+                const div = document.createElement('div');
+                div.className = 'result';
+                div.innerHTML = `<p><strong>File Name:</strong> ${result.file}</p>
+                        <p><strong>Begin:</strong> ${result.begin}</p>
+                        <p><strong>Text:</strong> ${result.text}</p>`;
+                resultsContainer.appendChild(div);
+            });
+        }
+    </script>
+</body>
+
+</html>
