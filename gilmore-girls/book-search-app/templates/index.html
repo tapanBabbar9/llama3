@@ -88,7 +88,7 @@
         let books = [];
 
         // Fetch books from the FastAPI backend
-        fetch("http://127.0.0.1:8000/books")
+        fetch("/books")
             .then(response => response.json())
             .then(data => {
                 books = data.books;
@@ -114,7 +114,7 @@
 
         function searchBookMentions(book) {
             // Fetch search results for the selected book
-            fetch(`http://127.0.0.1:8000/search?query=${encodeURIComponent(book)}`)
+            fetch(`/search?query=${encodeURIComponent(book)}`)
                 .then(response => {
                     // Check if response is OK
                     if (!response.ok) {
