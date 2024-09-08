@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from sqlalchemy import create_engine, text
-from langchain.embeddings import OllamaEmbeddings
+from langchain_community.embeddings import OllamaEmbeddings
 import ollama
 
 # Configure the PostgreSQL connection
@@ -82,7 +82,7 @@ if user_query:
             )
 
         prompt = f"""
-        You are a professional bartender. Based on the following cocktail recipes, respond to the user's query with the best recommendations:
+        You are {character} who is working as a professional bartender. Based on the following cocktail recipes, respond to the user's query with the best recommendations:
 
         {context}
 
