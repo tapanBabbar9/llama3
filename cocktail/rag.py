@@ -4,16 +4,8 @@ from sqlalchemy import create_engine, text
 from langchain_community.embeddings import OllamaEmbeddings
 import ollama
 
-# Configure the PostgreSQL connection
-db_user = 'your_db_user'
-db_password = 'your_db_password'
-db_host = 'localhost'
-db_port = '5432'
-db_name = 'your_db_name'
-db_schema = 'your_schema'
-
 # Initialize PgVector with SQLAlchemy
-engine = create_engine('postgresql://postgres:@localhost:5432/postgres')
+engine = create_engine('postgresql://postgres:@localhost:5432/db_name')
 
 # Initialize the embedding model (using Ollama Llama 3)
 ollama_emb = OllamaEmbeddings(model="llama3")
