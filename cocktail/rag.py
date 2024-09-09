@@ -5,7 +5,7 @@ from langchain_community.embeddings import OllamaEmbeddings
 import ollama
 
 # Initialize PgVector with SQLAlchemy
-engine = create_engine('postgresql://postgres:@localhost:5432/db_name')
+engine = create_engine('postgresql://username:password@localhost/db_name')
 
 # Initialize the embedding model (using Ollama Llama 3)
 ollama_emb = OllamaEmbeddings(model="llama3")
