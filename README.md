@@ -8,7 +8,7 @@ Follow these steps to get up and running with the Ollama application and the LLa
 
 ### Prerequisites
 
-- Ollama application (version X.X.X or higher)
+- Ollama application (v0.3.14 or higher)
 - Python 3.x
 - Internet connection for downloading the model
 
